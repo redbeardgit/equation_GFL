@@ -16,5 +16,7 @@ class CalculatorTest {
         assertEquals(3.25, calculator.calculate(arr));
         arr = new ArrayList<>(Arrays.asList("(", "26.1", "+", "15", ")", "*", "-5", "/", "10", "+", "10"));
         assertEquals(-10.55,calculator.calculate(arr));
+        arr = new ArrayList<>(Arrays.asList("2", "*", "-2"));
+        assertEquals(-4,calculator.calculate(arr));
     }
 }

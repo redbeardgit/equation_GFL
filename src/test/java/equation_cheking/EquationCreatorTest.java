@@ -27,6 +27,8 @@ class EquationCreatorTest {
         ArrayList<String> arr = new ArrayList<String>(Arrays.asList("-1.3", "*", "(", "-5", "/", "x", ")"));
         assertTrue(tester.checkEquation("-1.3*(-5/x)"));
         assertEquals(arr, tester.getCorrect_equation());
+        assertTrue(tester.checkEquation("2*x+5"));
+        assertTrue(tester.checkEquation("2*x+5+x+5"));
         assertFalse(tester.checkEquation("1.3*5/-x"));
         assertFalse(tester.checkEquation("1.3*a/x"));
         assertFalse(tester.checkEquation("2+*4"));

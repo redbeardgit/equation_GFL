@@ -66,7 +66,8 @@ public class EquationCreator {
             System.out.println("3. Get all equations");
             System.out.println("4. Get equations with one root");
             System.out.println("5. Get equations without roots");
-            System.out.println("6. Exit from search");
+            System.out.println("6. Get equations with specific root");
+            System.out.println("7. Exit from search");
             Scanner in = new Scanner(System.in);
             int choice = 0;
             if (in.hasNextInt()){
@@ -100,6 +101,18 @@ public class EquationCreator {
                         }
                         break;
                     case 6:
+                        System.out.print("Insert root: ");
+                        double root = in.nextDouble();
+                        arr = dbWorker.getEquationWithRoot(root);
+                        if (!arr.isEmpty()){
+                            System.out.println(arr);
+                        }
+                        else {
+                            System.out.println("We have not equations with current root: " + root );
+                        }
+
+                        break;
+                    case 7:
                         flag = false;
                         break;
                     default:
@@ -110,52 +123,84 @@ public class EquationCreator {
     }
 
 
+
+
     public void getEquationFromTerminal(){
         Scanner scanner = new Scanner(System.in);
         System.out.println("Insert equation:");
         String equation = scanner.nextLine();
         logger.info("Introduced equation:" + equation);
         String[] test = equation.split("=");
+        int left_side = 0;
+        int right_side = 1;
         boolean flag = true;
         if(test.length != 2){
             flag = false;
             logger.error("Incorrect expression");
         }
-        if (!isDigit(test[1])){
-            flag = false;
-            logger.error("In right side must be number!");
+        else{
+            if (!isDigit(test[right_side])){
+                if (!isDigit(test[left_side])){
+                    flag = false;
+                    logger.error("In right side must be number!");
+                }
+                else {
+                    left_side = 1;
+                    right_side = 0;
+                }
+
+
+            }
+
+            if (!checkEquation(test[left_side])){
+                flag = false;
+                logger.error("Incorrect order of operators  or incorrect operands");
+            }
+
+            if (!checkBrackets(test[left_side])){
+                flag = false;
+                logger.error("The order of brackets is incorrect");
+            }
+
         }
-        if (!checkBrackets(test[0])){
-            flag = false;
-        }
-        if (!checkEquation(test[0])){
-            flag = false;
-            logger.error("Incorrect order of operators  or incorrect operands");
-        }
+
         if (!flag){
             System.out.println("Incorrect equation");
         }
         else {
             System.out.println("Correct equation");
+            logger.info("Correct equation");
             dbWorker.insertEquation(equation);
             dbWorker.getEquationId(equation);
-            addRoot(Double.parseDouble(test[1]), this.correct_equation, dbWorker.getEquationId(equation));
+            addRoot(Double.parseDouble(test[right_side]), this.correct_equation, dbWorker.getEquationId(equation));
         }
+
+    }
+
+
+    public ArrayList<String> replaceAllX(ArrayList<String> arr, double root){
+        for (int i = 0; i < arr.size(); i++) {
+            if (arr.get(i).equals("x")){
+                arr.set(i, Double.toString(root));
+            }
+
+        }
+        return arr;
 
     }
 
     public void addRoot(double right, ArrayList<String> arr, int equation_id){
         boolean flag = true;
         while (flag){
+            ArrayList<String> tmp_arr = new ArrayList<>(arr);
             System.out.print("Insert equation root? y/n: ");
             Scanner in = new Scanner(System.in);
             String str = in.nextLine();
             if (str.equals("y")){
                 if (in.hasNextDouble()){
                     double root = in.nextDouble();
-                    int index = arr.indexOf("x");
-                    arr.set(index, Double.toString(root));
-                    double left = calculator.calculate(arr);
+                    tmp_arr = replaceAllX(tmp_arr, root);
+                    double left = calculator.calculate(tmp_arr);
                     if (left == right){
                         System.out.println("Correct root");
                         dbWorker.updateRootCount(equation_id);

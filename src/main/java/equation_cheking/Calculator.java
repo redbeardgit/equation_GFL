@@ -49,7 +49,7 @@ public class Calculator {
         }
         else{
             result = 0;
-            logger.error("Check your");
+            logger.error("Check your operands");
         }
         return result;
     }

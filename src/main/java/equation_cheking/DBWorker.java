@@ -15,6 +15,8 @@ public class DBWorker {
     final private String insertRoot = "insert into public.roots (equation_id, root) values (?, ?);";
     final private String getEqWithRootCount = "select expression from public.equations where root_count = ?;";
     final private String getAllEquation = "select expression from public.equations;";
+    final private String getEquationId = "select equation_id from public.roots where root = ?;";
+    final private String getEquationWithId = "select expression from public.equations where id = ?;";
 
     public DBWorker(String url, String login, String pass) {
 
@@ -41,7 +43,7 @@ public class DBWorker {
             stmt.setString(1, equation);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             logger.error("Can not add to db");
         }
 
@@ -53,7 +55,7 @@ public class DBWorker {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             logger.error("Can not update root_count");
         }
 
@@ -70,7 +72,8 @@ public class DBWorker {
             res.next();
             id = res.getInt("id");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
         }
 
         return id;
@@ -84,7 +87,8 @@ public class DBWorker {
             stmt.setDouble(2, root);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
         }
 
     }
@@ -99,7 +103,8 @@ public class DBWorker {
                 arr.add(set.getString("expression"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
         }
         return arr;
     }
@@ -115,8 +120,31 @@ public class DBWorker {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
         }
         return arr;
+    }
+
+    public ArrayList<String> getEquationWithRoot(double root){
+        ArrayList<String> arr = new ArrayList<>();
+        try{
+            PreparedStatement preparedStatement = connection.prepareStatement(getEquationId);
+            preparedStatement.setDouble(1, root);
+            ResultSet set = preparedStatement.executeQuery();
+            while(set.next()){
+                PreparedStatement statement = connection.prepareStatement(getEquationWithId);
+                statement.setInt(1, set.getInt("equation_id"));
+                ResultSet expr = statement.executeQuery();
+                expr.next();
+                arr.add(expr.getString("expression"));
+            }
+
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
+        }
+        return arr;
+
     }
 }
